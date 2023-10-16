@@ -1,0 +1,182 @@
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
+<link rel="stylesheet" href="../restaurant.css">
+
+<body background="../images/background2.jpg"  style="background-repeat:no-repeat; background-size:cover ;">
+
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+ <a class="navbar-brand" href="../Home.html">Restaurant Oldies</a>
+<ul>
+
+<li class="nav-item">
+<a href="../Home.html">Back Home</a>
+</li>
+<li class="nav-item">
+<a href="../comenzi/Comenzi.html" >Comenzi</a>
+</li>
+</ul>
+</nav>
+<script>
+console.log(document.cookie)
+function get_produse()
+{
+
+var url="https://localhost:7094/api/Produs"
+
+
+var headersO={
+      "Content-Type": "application/json","Authorization":"Bearer "+sessionStorage.getItem("token"),
+      // 'Content-Type': 'application/x-www-form-urlencoded',
+    }
+
+console.log(headersO)
+
+
+fetch(url, {
+
+    method: "GET", // *GET, POST, PUT, DELETE, etc.
+    mode: "cors", // no-cors, *cors, same-origin
+    cache: "no-cache", // *default, no-cache, reload, force-cache, only-if-cached
+    credentials: "same-origin", // include, *same-origin, omit
+    headers: headersO ,
+    redirect: "follow", // manual, *follow, error
+    referrerPolicy: "no-referrer", // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+  }).then(response=>
+  {
+     console.log(response)
+     if (response.redirected) {
+            window.location.href = response.url;
+        }
+		else
+		if(response.status==401 || response.status==403)
+         { window.location="https://localhost:7094/Identity/Account/Login" 
+		 console.log("Response:"+response) 
+		  response.text()
+		 
+		 } 
+     else
+	 {
+	   console.log("here")
+       return response.json()
+      }
+  
+  }
+  
+  ).
+  then(data=>
+  {
+   console.log("Data:"+data)
+   for(let prod of data)
+   {
+    let div=document.createElement("div")
+    let name=document.createElement("span")
+	let pret=document.createElement("span")
+	let edit=document.createElement("a")
+	let delete_a=document.createElement("a")
+	let addToComnada=document.createElement("button")
+	name.textContent=prod["name"]
+	pret.textContent="pret: "+prod["pret"]+" lei"
+	edit.href="EditProduct.html?id="+prod["id"]
+	edit.textContent="Edit"
+	delete_a.textContent="Delete"
+	
+    delete_a.href="https://localhost:7094/api/Produs/delete/"+prod["id"]
+	delete_a.addEventListener("click",function()
+	{
+	
+	
+	})
+	
+	
+	
+	addToComnada.textContent="Adauga la comnanda curenta"
+	addToComnada.addEventListener("click",function()
+	{
+	           var comandaJson=sessionStorage.getItem("comanda")
+                               var comanda=JSON.parse(comandaJson)
+                               comanda["produse"].push(prod["id"])
+                              sessionStorage.setItem("comanda",JSON.stringify( comanda))
+	
+	})
+	 
+	
+	
+	
+	
+   div.appendChild(name)
+   
+    div.appendChild(document.createElement("br"))
+	
+	
+	div.appendChild(pret)
+    div.appendChild(document.createElement("br"))
+	
+	for(let img of prod["images"])
+	{
+	var newimg=document.createElement("img")
+	newimg.src=img["data"]
+	newimg.style.width="250px"
+	newimg.style.height="200px"
+	 div.appendChild(newimg)
+	
+	
+	}
+	 div.appendChild(document.createElement("br"))
+	
+	
+	
+	
+	
+	
+
+   div.appendChild(edit)
+   div.appendChild(document.createElement("br"))
+   div.appendChild(delete_a)
+   div.appendChild(document.createElement("br"))
+   div.appendChild(addToComnada)
+   div.appendChild(document.createElement("br"))
+   div.appendChild(document.createElement("hr"))
+   
+   document.body.appendChild(div)
+   
+   }
+  
+  
+  })
+ 
+
+
+
+
+
+
+
+
+
+}
+
+get_produse()
+
+
+
+
+
+
+
+
+</script>
+
+
+
+<div "col-xs-1 text-center">
+
+
+<h3 style="text-align: center">Menu</h3>
+<button><a href="AddProduct.html">Adauga produs</a></button>
+
+
+
+</div>
+</body>

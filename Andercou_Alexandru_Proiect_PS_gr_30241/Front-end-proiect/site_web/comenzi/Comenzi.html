@@ -1,0 +1,514 @@
+
+
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css"/>
+<script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"/>
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
+
+<link rel="stylesheet" href="../restaurant.css">
+
+<script>
+
+
+function exportF(type)
+{
+var url="https://localhost:7094/api/Comenzi/export/"+type
+var data={
+ "path": document.getElementById("filename").value,
+  "start":document.getElementById("start").value,
+  "end": document.getElementById("end").value
+
+}
+fetch(url, {
+
+    method: "POST", // *GET, POST, PUT, DELETE, etc.
+    mode: "cors", // no-cors, *cors, same-origin
+    cache: "no-cache", // *default, no-cache, reload, force-cache, only-if-cached
+    credentials: "same-origin", // include, *same-origin, omit
+    headers: {
+      "Content-Type": "application/json","Authorization":"Bearer "+sessionStorage.getItem("token"),
+      // 'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    body:JSON.stringify(data),
+    redirect: "follow", // manual, *follow, error
+    referrerPolicy: "no-referrer", // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+  }).then(response=>     
+  {console.log(response)
+     if (response.redirected) {
+            window.location.href = response.url;
+        }
+		else
+		if(response.status==401 || response.status==403)
+          window.location="https://localhost:7094/Identity/Account/Login"
+     else
+	 {
+	   console.log("here")
+       return response.json()
+      }}).then(res=>
+
+
+{
+console.log(res);
+  var a = document.createElement("a");
+  
+    a.textContent="Download requested file:"+res["filename"]
+    a.href = "data:plain/text;base64," + res["content"]
+	
+	  a.download =res["filename"]
+	  document.body.appendChild(a)
+	  document.body.appendChild(document.createElement("br"))
+	  
+}
+
+)
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+function  adauga_comanda()
+{
+var comandanoua={"id":0,"produse":[]}
+sessionStorage.setItem("comanda",JSON.stringify(comandanoua) )
+window.location="AddComanda.html"
+
+}
+
+
+function show_all_comenzi()
+{
+
+var url="https://localhost:7094/api/Comenzi"
+
+fetch(url, {
+
+    method: "GET", // *GET, POST, PUT, DELETE, etc.
+    mode: "cors", // no-cors, *cors, same-origin
+    cache: "no-cache", // *default, no-cache, reload, force-cache, only-if-cached
+    credentials: "same-origin", // include, *same-origin, omit
+    headers: {
+      "Content-Type": "application/json","Authorization":"Bearer "+sessionStorage.getItem("token"),
+      // 'Content-Type': 'application/x-www-form-urlencoded',
+    },
+  
+    redirect: "follow", // manual, *follow, error
+    referrerPolicy: "no-referrer", // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+  }).then(response=>{console.log(response)
+     if (response.redirected) {
+            window.location.href = response.url;
+        }
+		else
+		if(response.status==401 || response.status==403)
+          window.location="https://localhost:7094/Identity/Account/Login"
+     else
+	 {
+	   console.log("here")
+       return response.json()
+      }}).then(res=>
+
+
+{
+console.log(res);
+var table=document.getElementById("comenzi_table")
+
+table.innerHTML=""
+for(var comanda of res)
+{
+
+var row=document.createElement("tr")
+
+
+var id=document.createElement("th")
+var status=document.createElement("td")
+var data=document.createElement("td")
+var pretTotal=document.createElement("td")
+var  produse=document.createElement("td")
+
+   let unique = [...new Set(comanda["produseComanda"].map(x=>x["productId"]))];
+     produse.innerHTML=JSON.stringify(unique )
+var  editLink=document.createElement("td")
+var  deleteLink=document.createElement("td")
+var  detailsLink=document.createElement("td")
+
+
+id.innerHTML=comanda["id"]
+status.innerHTML=comanda["status"]
+data.innerHTML=comanda["date"]
+pretTotal.innerHTML=comanda["pretTotal"]
+var edita=document.createElement("a")
+edita.href="EditComanda.html?id="+comanda["id"]
+edita.textContent="Edit"
+
+ editLink.appendChild(edita)
+
+var  deletea=document.createElement("a")
+deletea.href="https://localhost:7094/api/Comenzi/delete/"+comanda["id"]
+deletea.textContent="Delete"
+deleteLink.appendChild(deletea)
+
+
+var  detailsa=document.createElement("a")
+detailsa.href="DetaliiComanda.html?id="+comanda["id"]
+detailsa.textContent="Details"
+detailsLink.appendChild(detailsa)
+
+
+
+ id.scope="row"
+ 
+row.appendChild(id)
+row.appendChild(status)
+row.appendChild( data)
+row.appendChild(pretTotal)
+row.appendChild(produse)
+row.appendChild(editLink)
+row.appendChild(deleteLink)
+row.appendChild(detailsLink)
+table.appendChild(row)
+
+}
+
+
+
+
+
+})
+
+
+
+
+}
+
+
+
+function show_comenzi_time_interval()
+{
+
+
+var url="https://localhost:7094/api/OrdersAPI/betweenDates?start="+document.getElementById("start").value+"&end="+document.getElementById("end").value
+
+fetch(url, {
+
+    method: "GET", // *GET, POST, PUT, DELETE, etc.
+    mode: "cors", // no-cors, *cors, same-origin
+    cache: "no-cache", // *default, no-cache, reload, force-cache, only-if-cached
+    credentials: "same-origin", // include, *same-origin, omit
+    headers: {
+      "Content-Type": "application/json","Authorization":"Bearer "+sessionStorage.getItem("token"),
+      // 'Content-Type': 'application/x-www-form-urlencoded',
+    },
+  
+    redirect: "follow", // manual, *follow, error
+    referrerPolicy: "no-referrer", // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+  }).then(response=>response.json()).then(res=>
+
+
+{
+console.log(res);
+var table=document.getElementById("comenzi_table")
+
+table.innerHTML=""
+for(var comanda of res)
+{
+
+var row=document.createElement("tr")
+
+
+var id=document.createElement("td")
+var status=document.createElement("td")
+var data=document.createElement("td")
+var pretTotal=document.createElement("td")
+var  produse=document.createElement("td")
+produse.innerHTML=JSON.stringify(comanda["produseComanda"])
+var  editLink=document.createElement("td")
+var  deleteLink=document.createElement("td")
+var  detailsLink=document.createElement("td")
+
+
+id.innerHTML=comanda["id"]
+status.innerHTML=comanda["status"]
+data.innerHTML=comanda["date"]
+pretTotal.innerHTML=comanda["pretTotal"]
+var edita=document.createElement("a")
+edita.href="EditComanda.html?id="+comanda["id"]
+edita.textContent="Edit"
+
+ editLink.appendChild(edita)
+
+var  deletea=document.createElement("a")
+deletea.href="https://localhost:7094/api/Comenzi/delete/"+comanda["id"]
+deletea.textContent="Delete"
+deleteLink.appendChild(deletea)
+
+
+var  detailsa=document.createElement("a")
+detailsa.href="DetaliiComanda.html?id="+comanda["id"]
+detailsa.textContent="Details"
+detailsLink.appendChild(detailsa)
+
+row.appendChild(id)
+row.appendChild(status)
+row.appendChild( data)
+row.appendChild(pretTotal)
+row.appendChild(produse)
+row.appendChild(editLink)
+row.appendChild(deleteLink)
+row.appendChild(detailsLink)
+table.appendChild(row)
+
+}
+
+
+
+
+
+})
+
+
+}
+function show_produse_top()
+{
+
+
+var url="https://localhost:7094/api/OrdersAPI/topComandate?start="+document.getElementById("start").value+"&end="+document.getElementById("end").value
+
+fetch(url, {
+
+    method: "GET", // *GET, POST, PUT, DELETE, etc.
+    mode: "cors", // no-cors, *cors, same-origin
+    cache: "no-cache", // *default, no-cache, reload, force-cache, only-if-cached
+    credentials: "same-origin", // include, *same-origin, omit
+    headers: {
+      "Content-Type": "application/json","Authorization":"Bearer "+sessionStorage.getItem("token"),
+      // 'Content-Type': 'application/x-www-form-urlencoded',
+    },
+  
+    redirect: "follow", // manual, *follow, error
+    referrerPolicy: "no-referrer", // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+  }).then(response=>{console.log(response)
+     if (response.redirected) {
+            window.location.href = response.url;
+        }
+		else
+		if(response.status==401 || response.status==403)
+          window.location="https://localhost:7094/Identity/Account/Login"
+     else
+	 {
+	   console.log("here")
+       return response.json()
+      }}).then(res=>
+
+
+{
+console.log(res);
+var table=document.getElementById("produse_top")
+
+table.innerHTML=""
+
+var row_header=document.createElement("tr")
+
+var rank_col=document.createElement("td")
+var id_col=document.createElement("td")
+var denumire_col=document.createElement("td")
+var pretP_col=document.createElement("td")
+var quantity_col=document.createElement("td")
+var stoc_col=document.createElement("td")
+
+
+rank_col.innerHTML="Top ordered"
+id_col.innerHTML="id"
+denumire_col.innerHTML="denumire"
+pretP_col.innerHTML="pret"
+quantity_col.innerHTML="cantitate"
+stoc_col.innerHTML="stoc"
+
+
+
+
+
+row_header.appendChild( rank_col)
+row_header.appendChild(id_col)
+row_header.appendChild(denumire_col)
+row_header.appendChild( pretP_col)
+row_header.appendChild(quantity_col)
+row_header.appendChild(stoc_col)
+
+
+table.appendChild(row_header)
+for(var produs of res)
+{
+
+var row=document.createElement("tr")
+
+var rank=document.createElement("td")
+var id=document.createElement("td")
+var denumire=document.createElement("td")
+var pretP=document.createElement("td")
+var quantity=document.createElement("td")
+var stoc=document.createElement("td")
+
+
+var  produse=document.createElement("td")
+
+var  editLink=document.createElement("td")
+var  deleteLink=document.createElement("td")
+var  detailsLink=document.createElement("td")
+
+rank.innerHTML= produs["rank"]+1
+id.innerHTML= produs["produs"]["id"]
+denumire.innerHTML= produs["produs"]["name"]
+pretP.innerHTML= produs["produs"]["pret"]
+quantity.innerHTML= produs["numberOfOrders"]
+stoc.innerHTML= produs["produs"]["stoc"]
+
+
+
+var edita=document.createElement("a")
+edita.href="EditProduct.html?id="+produs["produs"]["id"]
+edita.textContent="Edit"
+
+ editLink.appendChild(edita)
+
+var  deletea=document.createElement("a")
+deletea.href="https://localhost:7094/api/Produse/delete/"+produs["produs"]["id"]
+deletea.textContent="Delete"
+deleteLink.appendChild(deletea)
+
+
+var  detailsa=document.createElement("a")
+detailsa.href="../produse/DetaliiProduct.html?id="+produs["produs"]["id"]
+detailsa.textContent="Details"
+detailsLink.appendChild(detailsa)
+
+
+row.appendChild(rank)
+row.appendChild(id)
+row.appendChild(denumire)
+row.appendChild( pretP)
+row.appendChild(quantity)
+row.appendChild(stoc)
+row.appendChild(editLink)
+row.appendChild(deleteLink)
+row.appendChild(detailsLink)
+table.appendChild(row)
+
+}
+
+
+
+
+
+})
+
+
+}
+
+
+
+
+show_all_comenzi()
+
+</script>
+<body background="../images/background4.jpg"  style="background-repeat:no-repeat; background-size:cover ;">
+
+<nav  class="navbar navbar-expand-lg navbar-light bg-light">
+ <a class="navbar-brand" href="../Home.html">Restaurant Oldies</a>
+<ul>
+<li >
+<a href="../Home.html">Back Home</a>
+</li>
+<li >
+<a href="../produse/Produse.html">Produse</a>
+</li>
+</ul>
+</nav>
+
+
+
+
+<h3  style="text-align: center ; color:white;background-color:black">Comenzi</h3>
+
+
+
+<table  class="table table-bordered"  style="background-color:black" id="table1" >
+<thead class="thead thead-dark">
+<tr>
+      <th scope="col">#</th>
+      <th scope="col">Status</th>
+      <th scope="col">Data Creierii</th>
+      <th scope="col">Valoare totala</th>
+	   <th scope="col">Produse comandate</th>
+	  <th scope="col"><button id="add"  onclick="adauga_comanda()" >Add comanda</button></th>
+	  <th scope="col"><button id="all" onclick="show_all_comenzi()">Get  All Comenzi</button></th>
+	  <th scope="col">More details</th>
+	  
+    </tr>
+
+</thead>
+<tbody   style="background-color:bisque" id="comenzi_table">
+
+
+</tbody>
+
+
+
+</table>
+
+
+<div  style="margin:0 auto;">
+
+<h3 style="text-align: center ; color:white;background-color:black" >Rapoarte</h3>
+<p style="color:white"> Start date            End date</p>
+<input type="date" id="start"/>
+<input type="date" id="end"/>
+
+<br>
+<button onclick="show_comenzi_time_interval()">Get Comenzi</button>
+<br>
+<button onclick="show_produse_top()">Get Produse comandate</button>
+<br>
+
+<table id="produse_top" class="table">
+
+
+</table>
+
+
+
+
+<br>
+
+<div  id="raport_div">
+
+<label style="color:white">Nume fisier export(fara extensie)</label>
+<input id="filename"/>
+<br>
+<button onclick="exportF(1)" >Export csv</button>
+
+<button onclick="exportF(2)" >Export excell</button>
+<br>
+</div>
+</div>
+
+</body>
+<script>
+$('#table1').DataTable({
+    pageLength : 5});
+
+</script>

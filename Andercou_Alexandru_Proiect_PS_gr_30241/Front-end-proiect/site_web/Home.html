@@ -1,0 +1,29 @@
+
+
+
+
+<script>
+ const urlParams = new URLSearchParams(window.location.search);
+  let token=urlParams.get("token");
+  if(token!=null && token!="")
+  sessionStorage.setItem("token",token)
+
+function logout()
+{
+
+
+sessionStorage.setItem("token","")
+
+}
+
+
+
+
+</script>
+
+
+<body background="images/background.jpg"  style="background-repeat:no-repeat; background-size: 100vw 100vh;">
+
+<script src="Navbar.js"></script>
+
+</body>

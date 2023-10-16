@@ -1,0 +1,21 @@
+img
+{
+
+width:250px;
+heigth:250px;
+
+}
+button
+{
+background-color:"green";
+
+
+}
+
+button :hover
+{
+background-color:"yellow";
+
+
+}
+li { display: inline; } 

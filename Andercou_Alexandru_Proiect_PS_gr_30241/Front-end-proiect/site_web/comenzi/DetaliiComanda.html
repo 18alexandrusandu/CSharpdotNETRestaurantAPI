@@ -1,0 +1,133 @@
+
+<link rel="stylesheet" href="../restaurant.css">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
+<script>
+var id
+ const urlParams = new URLSearchParams(window.location.search);
+  id=urlParams.get("id");
+
+
+
+  let url="https://localhost:7094/api/Comenzi/"+id;
+  let url2="https://localhost:7094/api/Produs/";
+  
+  
+  
+  function get_comanda_data()
+  {
+  fetch(url, {
+
+    method: "GET", // *GET, POST, PUT, DELETE, etc.
+    mode: "cors", // no-cors, *cors, same-origin
+    cache: "no-cache", // *default, no-cache, reload, force-cache, only-if-cached
+    credentials: "same-origin", // include, *same-origin, omit
+    headers: {
+      "Content-Type": "application/json","Authorization":"Bearer "+sessionStorage.getItem("token"),
+      // 'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    redirect: "follow", // manual, *follow, error
+    referrerPolicy: "no-referrer", // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+  }
+
+
+).then(response=>{
+     console.log(response)
+    if(response.status==401 || response.status==403)
+    {window.location="https://localhost:7094/Identity/Account/Login"
+	}
+	else  
+	{
+	//console.log("")
+	return response.json()
+	
+	}
+	}
+	
+	).then(data=>
+{
+
+console.log(data)
+document.getElementById("status").value=data["status"]
+
+document.getElementById("status").readonly=true
+
+
+var date_time=new Date(data["date"])
+
+document.getElementById("date").value=date_time.toISOString().slice(0, 16);
+document.getElementById("date").readonly=true
+
+
+document.getElementById("pret").value=data["pretTotal"]
+document.getElementById("pret").readonly=true
+document.getElementById("id").value=data["id"]
+document.getElementById("id").readonly=true
+   for(let prod of data["produseComanda"])
+   {
+   
+   
+   
+     var par=document.createElement("p")
+	  par.textContent="Product with id:"+prod["productId"]+" with quantity of:"+ prod["quantity"]
+   
+      document.getElementById("produse").appendChild( par)
+	  
+	    var a=document.createElement("a")
+	  a.textContent="Detalii produs"
+      a.href="../produse/DetaliiProduct.html?id="+prod["productId"]
+      document.getElementById("produse").appendChild( a)
+	    document.getElementById("produse").appendChild(document.createElement("br"))
+   }
+
+
+
+
+})
+  }
+get_comanda_data()
+
+
+
+</script>
+
+
+<body>
+<nav  class="navbar navbar-expand-lg navbar-light bg-light">
+<ul>
+<li >
+<button><a href="../Home.html">Back Home</a></button>
+</li>
+<li >
+<button><a href="Produse.html">Back to Menu</a></button>
+</li>
+</ul>
+</nav>
+<h3>Detalli comanda</h3>
+<p>Status</p>
+<input id="status"/>
+<p>Data comenzii</p>
+<input type="datetime-local" id="date"/>
+<p>Pret total</p>
+<input id="pret"/>
+<p>Id comanda</p>
+<input id="id">
+
+<div id="produse">
+<p>Lista produse comandate<p>
+
+
+</div>
+
+</body>
+
+<script>
+
+var edit_a=document.createElement("a")
+edit_a.href="EditComanda.html?id="+id
+edit_a.textContent="Edit"
+document.body.appendChild(edit_a)
+
+
+</script>
